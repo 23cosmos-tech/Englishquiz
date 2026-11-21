@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>크리스마스 영어 탐험 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#fff;background:linear-gradient(180deg,#0a1a38 0%,#12305a 55%,#1b4a6e 100%);min-height:100vh;overflow-x:hidden}
+[hidden]{display:none!important}
+#snow{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.flake{position:absolute;top:-30px;color:#fff;opacity:.8;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(115vh) translateX(var(--dx,0px))}}
+main{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:14px}
+.screen{display:none}
+.screen.active{display:block}
+.panel{max-width:700px;margin:0 auto;background:rgba(255,255,255,.1);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);border-radius:22px;padding:22px}
+h1{margin:4px 0 4px;text-align:center;font-size:clamp(24px,6vw,36px);font-weight:400;text-shadow:0 3px 10px rgba(0,0,0,.4)}
+.sub{text-align:center;margin:0 0 18px;color:#ffe9a8;font-size:17px}
+label.lb{display:block;margin:14px 0 6px;font-size:18px;color:#ffd24a}
+#name{width:100%;padding:12px 16px;font:inherit;font-size:20px;border-radius:14px;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.95);color:#222}
+#name:focus{outline:3px solid #ffd24a}
+#chars{display:flex;gap:12px}
+.char{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px 10px;border-radius:16px;border:2px solid transparent;background:rgba(255,255,255,.13);color:#fff;font:inherit;font-size:18px;cursor:pointer;transition:transform .12s,background .12s}
+.char:hover{transform:translateY(-2px);background:rgba(255,255,255,.2)}
+.char.sel{border-color:#ffd24a;background:rgba(255,210,74,.22)}
+.char canvas{width:72px;height:96px}
+#units{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.unit{position:relative;display:flex;align-items:center;gap:10px;text-align:left;padding:12px;border-radius:16px;border:2px solid transparent;background:rgba(255,255,255,.13);color:#fff;font:inherit;cursor:pointer;transition:transform .12s,background .12s}
+.unit:hover{transform:translateY(-2px);background:rgba(255,255,255,.2)}
+.unit.sel{border-color:#ffd24a;background:rgba(255,210,74,.22)}
+.ue{font-size:30px}
+.ut b{display:block;font-weight:400;font-size:17px;line-height:1.25}
+.ut small{display:block;font-size:12px;color:#cfe3ff;margin-top:2px}
+.ub{position:absolute;right:8px;top:6px;font-size:12px;background:#ffd24a;color:#5a3b00;border-radius:999px;padding:1px 8px}
+.msg{min-height:26px;margin:12px 0 0;text-align:center;color:#ffd24a;font-size:17px}
+.btn{display:inline-block;padding:13px 26px;border:0;border-radius:999px;background:#e53935;color:#fff;font:inherit;font-size:19px;cursor:pointer;box-shadow:0 4px 0 #a4201e;transition:transform .1s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #a4201e}
+.btn.ghost{background:#3d5d8c;box-shadow:0 4px 0 #26406a}
+.center{text-align:center}
+.total{text-align:center;margin:14px 0 0;color:#cfe3ff;font-size:16px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.back{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:15px;cursor:pointer}
+.utitle{font-size:clamp(17px,4.5vw,24px);text-align:center;flex:1}
+.pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.pill{background:rgba(255,255,255,.15);border-radius:999px;padding:5px 14px;font-size:16px}
+.pill.bump{animation:bump .5s}
+@keyframes bump{40%{transform:scale(1.25);background:#ffd24a;color:#5a3b00}}
+.tip{text-align:center;color:#cfe3ff;font-size:15px;margin:6px 0 0}
+.stage{position:relative;margin:8px auto 0;width:min(100%,860px,calc((100vh - 230px)*4/3));min-width:300px}
+.stage canvas{display:block;width:100%;height:auto;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.45);touch-action:none;background:#000;cursor:pointer}
+.dpad{position:absolute;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px);gap:4px;opacity:.85}
+.dpad button{border:2px solid rgba(255,255,255,.7);border-radius:50%;background:rgba(20,30,60,.55);color:#fff;font-size:22px;touch-action:none;cursor:pointer;-webkit-user-select:none;user-select:none}
+.dpad button:active{background:rgba(255,210,74,.6)}
+.dpad .u{grid-column:2;grid-row:1}
+.dpad .l{grid-column:1;grid-row:2}
+.dpad .r{grid-column:3;grid-row:2}
+.dpad .d{grid-column:2;grid-row:3}
+@media (hover:hover) and (pointer:fine){.dpad{display:none}}
+.overlay{position:fixed;inset:0;background:rgba(5,12,30,.72);display:flex;align-items:center;justify-content:center;padding:14px;z-index:10}
+.card{position:relative;background:#fffaf0;color:#2b2b2b;border-radius:22px;max-width:520px;width:100%;padding:22px;max-height:92vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.5);animation:pop .25s}
+@keyframes pop{from{transform:scale(.85);opacity:0}}
+.x{position:absolute;right:12px;top:10px;border:0;background:#eee;border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;color:#555}
+.mhead{color:#c62828;font-size:16px;margin-right:36px}
+.k{margin:10px 0 0;color:#6a5a3a;font-size:16px}
+.q{margin:6px 0 10px;font-size:clamp(22px,5.5vw,28px);font-weight:400;line-height:1.35;color:#1b2b4a}
+.blank{display:inline-block;min-width:60px;border-bottom:3px solid #e53935;margin:0 4px;color:transparent}
+.opt{display:block;width:100%;text-align:left;padding:12px 14px;margin:8px 0;border-radius:14px;border:2px solid #e0d6c2;background:#fff;font:inherit;font-size:19px;color:#2b2b2b;cursor:pointer;transition:border-color .1s,transform .1s}
+.opt:hover:not(:disabled){border-color:#e53935;transform:translateX(3px)}
+.opt:disabled{cursor:default}
+.opt.correct{background:#d8f5e0;border-color:#2e9e57}
+.opt.wrong{background:#fde0e0;border-color:#d93a3a}
+.fb{margin-top:10px;padding:10px 14px;border-radius:12px;font-size:17px;line-height:1.55}
+.fb b{display:block;font-weight:400;font-size:20px}
+.fb.ok{background:#e4f8ea;color:#1e6b3a}
+.fb.no{background:#fdeaea;color:#a02828}
+#next{margin-top:14px;width:100%}
+.big{font-size:64px;line-height:1}
+.card.center h2{margin:8px 0 0;font-weight:400;font-size:28px;color:#c62828}
+.score{margin:4px 0;font-size:56px;color:#1b2b4a}
+.score small{font-size:24px;color:#777}
+.tot{color:#555;font-size:16px;margin:6px 0 16px}
+.btns{display:flex;flex-direction:column;gap:10px}
+.conf{position:fixed;top:-30px;z-index:20;pointer-events:none;animation:fall linear forwards}
+@media(max-width:480px){#units{grid-template-columns:1fr}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<div id="snow"></div>
+<main>
+  <!-- 시작 화면 -->
+  <section id="screen-start" class="screen active">
+    <div class="panel">
+      <h1>🎄 크리스마스 영어 탐험 🎁</h1>
+      <p class="sub">초등학교 5학년 영어 복습 · 집 안을 돌아다니며 선물을 찾아요!</p>
+      <label class="lb" for="name">✏️ 이름을 써 주세요</label>
+      <input id="name" type="text" maxlength="10" placeholder="이름" autocomplete="off">
+      <label class="lb">🧑 캐릭터를 골라 주세요</label>
+      <div id="chars">
+        <button class="char" type="button" data-g="boy"><canvas width="90" height="120" data-g="boy"></canvas><span>👦 남자아이</span></button>
+        <button class="char" type="button" data-g="girl"><canvas width="90" height="120" data-g="girl"></canvas><span>👧 여자아이</span></button>
+      </div>
+      <label class="lb">📚 단원을 골라 주세요</label>
+      <div id="units"></div>
+      <p class="msg" id="msg"></p>
+      <div class="center"><button class="btn" id="go" type="button">집으로 들어가기 🏠</button></div>
+      <p class="total" id="total"></p>
+    </div>
+  </section>
+
+  <!-- 게임 화면 -->
+  <section id="screen-game" class="screen">
+    <div class="bar">
+      <button class="back" id="back" type="button">← 단원 선택</button>
+      <div class="utitle" id="utitle"></div>
+      <button class="back" id="mute" type="button" aria-label="소리 켜기/끄기">🔊</button>
+    </div>
+    <div class="pills">
+      <span class="pill" id="pname"></span>
+      <span class="pill" id="pscore"></span>
+      <span class="pill" id="pprog"></span>
+    </div>
+    <p class="tip">⌨️ 방향키 · WASD로 걷거나 화면을 눌러 이동해요. 🎁 선물에 가까이 가면 퀴즈가 나와요!</p>
+    <div class="stage">
+      <canvas id="cv" aria-label="크리스마스 트리가 있는 거실"></canvas>
+      <div class="dpad">
+        <button class="u" data-k="up" type="button" aria-label="위">▲</button>
+        <button class="l" data-k="left" type="button" aria-label="왼쪽">◀</button>
+        <button class="r" data-k="right" type="button" aria-label="오른쪽">▶</button>
+        <button class="d" data-k="down" type="button" aria-label="아래">▼</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- 문제 창 -->
+<div id="modal" class="overlay" hidden role="dialog" aria-modal="true">
+  <div class="card">
+    <button class="x" id="mclose" type="button" aria-label="닫기">✕</button>
+    <div class="mhead" id="mhead"></div>
+    <p class="k" id="mk"></p>
+    <h2 class="q" id="mq"></h2>
+    <div id="opts"></div>
+    <div class="fb" id="fb" hidden><b id="fbh"></b><span id="fbe"></span></div>
+    <button class="btn" id="next" type="button" hidden>확인 ▶</button>
+  </div>
+</div>
+
+<!-- 결과 창 -->
+<div id="result" class="overlay" hidden>
+  <div class="card center">
+    <div class="big" id="rEmoji">🎉</div>
+    <h2 id="rTitle"></h2>
+    <p class="score"><span id="rScore">0</span><small> / 10</small></p>
+    <p id="rMsg"></p>
+    <p class="tot" id="rTot"></p>
+    <div class="btns">
+      <button class="btn" id="rNext" type="button">다음 단원으로 ▶</button>
+      <button class="btn ghost" id="rPick" type="button">단원 선택하기</button>
+      <button class="btn ghost" id="rRetry" type="button">이 단원 다시 풀기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 문제 데이터: 문제를 고치거나 추가하려면 아래 UNITS만 수정하세요.
+     o 배열의 첫 번째 보기가 정답이에요(화면에서는 자동으로 섞여요). -->
+<script>
+const UNITS = [
+  {
+    id: "u1", emoji: "👋", title: "자기소개와 인사", sub: "Greetings and Introductions",
+    qs: [
+      { k: "알맞은 대답을 고르세요.", q: "What's your name?", o: ["My name is Mina.", "I'm from Korea.", "I'm ten years old.", "I like pizza."], e: "이름을 물었으니 “My name is ~.”로 답해요." },
+      { k: "알맞은 대답을 고르세요.", q: "Where are you from?", o: ["I'm from Korea.", "I'm eleven.", "I'm fine.", "My name is Tom."], e: "어느 나라에서 왔는지 묻는 말이에요. “I'm from ~.”으로 답해요." },
+      { k: "알맞은 대답을 고르세요.", q: "Nice to meet you.", o: ["Nice to meet you, too.", "Goodbye.", "You're welcome.", "I'm sorry."], e: "처음 만났을 때 인사에는 “Nice to meet you, too.”라고 답해요." },
+      { k: "알맞은 대답을 고르세요.", q: "How are you?", o: ["I'm fine, thank you.", "My name is Tom.", "I'm from Canada.", "It's Monday."], e: "안부를 물었으니 “I'm fine, thank you.”로 답해요." },
+      { k: "알맞은 대답을 고르세요.", q: "How old are you?", o: ["I'm eleven years old.", "I'm from Japan.", "I'm a teacher.", "It's 11 o'clock."], e: "나이를 물을 때는 “I'm ~ years old.”로 답해요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "He ___ from Canada.", o: ["is", "am", "are", "do"], e: "주어가 He일 때는 be동사 is를 써요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "Jiho is a boy. ___ is my friend.", o: ["He", "She", "It", "They"], e: "남자 한 명은 He로 나타내요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "I ___ a student.", o: ["am", "is", "are", "be"], e: "주어가 I일 때는 am을 써요." },
+      { k: "영어로 바르게 쓴 것을 고르세요.", q: "“캐나다에서 왔어요.”", o: ["I'm from Canada.", "I from Canada.", "I'm to Canada.", "I'm at Canada."], e: "“I'm from ~.”은 어디에서 왔는지 말할 때 써요." },
+      { k: "알맞은 대답을 고르세요.", q: "Are you a student? — Yes, ___.", o: ["I am", "I do", "I'm", "I is"], e: "Are you ~?에는 Yes, I am.으로 답해요." }
+    ]
+  },
+  {
+    id: "u2", emoji: "🎨", title: "취미와 능력", sub: "Hobbies and Abilities",
+    qs: [
+      { k: "알맞은 대답을 고르세요.", q: "What do you do in your free time?", o: ["I play the guitar.", "I'm fine.", "It's Monday.", "I'm from Korea."], e: "여가 시간에 하는 일을 묻는 말이에요. 하는 활동으로 답해요." },
+      { k: "알맞은 대답을 고르세요.", q: "Can you swim? — Yes, ___.", o: ["I can", "I do", "I am", "it is"], e: "Can you ~?에는 Yes, I can. / No, I can't.로 답해요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "I ___ play soccer very well. (축구를 아주 잘할 수 있어요)", o: ["can", "am", "is", "does"], e: "“~할 수 있다”는 can으로 나타내요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "She can ___ the piano.", o: ["play", "plays", "playing", "played"], e: "can 뒤에는 동사원형을 써요." },
+      { k: "우리말 뜻을 고르세요.", q: "I like drawing pictures.", o: ["나는 그림 그리는 것을 좋아해요.", "나는 그림을 사고 싶어요.", "나는 그림을 보고 있어요.", "나는 그림을 잘 못 그려요."], e: "like ~ing는 “~하는 것을 좋아하다”라는 뜻이에요." },
+      { k: "알맞은 대답을 고르세요.", q: "Can you play badminton? — No, I ___.", o: ["can't", "don't", "isn't", "am not"], e: "Can you ~?에 “아니요”라고 답할 땐 No, I can't.예요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "My hobby is ___ books.", o: ["reading", "read", "reads", "reader"], e: "My hobby is 뒤에는 ~ing 형태를 써요. 독서하기 = reading." },
+      { k: "뜻이 알맞은 것을 고르세요.", q: "cooking", o: ["요리하기", "수영하기", "노래하기", "춤추기"], e: "cooking은 “요리하기”예요. cook(요리하다) + ing." },
+      { k: "알맞은 대답을 고르세요.", q: "What's your hobby?", o: ["My hobby is taking pictures.", "Yes, I can.", "I'm ten.", "It's sunny."], e: "취미를 물었으니 “My hobby is ~.”로 답해요." },
+      { k: "알맞은 대답을 고르세요.", q: "Can he play the violin? — Yes, he ___.", o: ["can", "does", "is", "has"], e: "Can he ~?에는 Yes, he can.으로 답해요." }
+    ]
+  },
+  {
+    id: "u3", emoji: "📅", title: "날짜와 요일", sub: "Days and Dates",
+    qs: [
+      { k: "알맞은 대답을 고르세요.", q: "What day is it today?", o: ["It's Friday.", "It's 3 o'clock.", "It's sunny.", "It's five dollars."], e: "“What day ~?”는 요일을 묻는 말이에요." },
+      { k: "알맞은 대답을 고르세요.", q: "When is your birthday?", o: ["It's May 5th.", "I'm eleven years old.", "It's five o'clock.", "I like cake."], e: "“When ~?”은 언제인지 묻는 말이라 날짜로 답해요." },
+      { k: "알맞은 말을 고르세요.", q: "May 1st → May ___", o: ["first", "one", "oneth", "once"], e: "1일은 first, 2일은 second, 3일은 third… 로 읽어요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "March is the ___ month of the year.", o: ["third", "three", "second", "fourth"], e: "3월은 한 해의 세 번째 달이므로 third예요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "Monday, Tuesday, ___, Thursday", o: ["Wednesday", "Friday", "Saturday", "Sunday"], e: "월-화-수-목 순서라서 Wednesday(수요일)예요." },
+      { k: "알맞은 말을 고르세요.", q: "October 9th → October ___", o: ["ninth", "nine", "nineth", "ninety"], e: "9번째(9일)는 ninth로 써요. (nineth는 틀린 철자예요)" },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "I have English class ___ Monday.", o: ["on", "in", "at", "to"], e: "요일 앞에는 on을 써요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "My birthday is ___ December.", o: ["in", "on", "at", "of"], e: "월 이름 앞에는 in을 써요." },
+      { k: "영어로 알맞은 것을 고르세요.", q: "“8월”", o: ["August", "April", "July", "June"], e: "8월은 August예요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "Children's Day is on May ___.", o: ["fifth", "five", "fiveth", "fifty"], e: "5일은 서수 fifth로 써요." }
+    ]
+  },
+  {
+    id: "u4", emoji: "⏰", title: "시각과 하루 일과", sub: "Time and Daily Routine",
+    qs: [
+      { k: "3시 30분이에요. 알맞은 대답은?", q: "What time is it?", o: ["It's three thirty.", "It's Tuesday.", "It's May 3rd.", "It's sunny."], e: "시각을 물으면 “It's + 시 + 분.”으로 답해요." },
+      { k: "알맞은 대답을 고르세요.", q: "What time do you get up?", o: ["I get up at seven.", "I get up on Monday.", "I get up in Seoul.", "I'm fine."], e: "시각 앞에는 at을 써요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "I ___ breakfast at 7:30.", o: ["have", "has", "am", "do"], e: "아침을 먹다 = have breakfast. 주어가 I이므로 have를 써요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "He ___ to school at eight.", o: ["goes", "go", "going", "gone"], e: "주어가 He(3인칭 단수)이면 go → goes로 써요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "I go to bed ___ ten o'clock.", o: ["at", "on", "in", "for"], e: "시각 앞에는 at을 써요." },
+      { k: "우리말 뜻을 고르세요.", q: "brush my teeth", o: ["이를 닦다", "머리를 감다", "세수하다", "옷을 입다"], e: "brush my teeth는 “이를 닦다”예요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "She ___ her homework after dinner.", o: ["does", "do", "doing", "is do"], e: "주어가 She이면 do → does로 써요." },
+      { k: "7시 15분이에요. 빈칸에 알맞은 말은?", q: "It's seven ___.", o: ["fifteen", "fifty", "five", "fourteen"], e: "15분은 fifteen이에요. (fifty는 50)" },
+      { k: "“낮 12시”를 뜻하는 말을 고르세요.", q: "12:00 in the daytime", o: ["noon", "night", "morning", "midnight"], e: "낮 12시는 noon, 밤 12시는 midnight이에요." },
+      { k: "알맞은 대답을 고르세요.", q: "Do you take a shower in the morning? — Yes, I ___.", o: ["do", "am", "can", "does"], e: "Do you ~?에는 Yes, I do.로 답해요." }
+    ]
+  },
+  {
+    id: "u5", emoji: "🗺️", title: "장소와 길 찾기", sub: "Places and Directions",
+    qs: [
+      { k: "알맞은 대답을 고르세요.", q: "Where is the library?", o: ["It's next to the park.", "It's ten o'clock.", "I'm eleven.", "I like books."], e: "장소를 물으면 위치로 답해요. next to = ~ 옆에." },
+      { k: "“모퉁이에서 왼쪽으로 도세요.”", q: "Turn ___ at the corner.", o: ["left", "right", "back", "over"], e: "left는 왼쪽, right는 오른쪽이에요." },
+      { k: "“두 블록 쭉 가세요.”", q: "Go ___ for two blocks.", o: ["straight", "turn", "stop", "see"], e: "go straight는 “쭉 직진하다”예요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "The bank is ___ the post office and the market.", o: ["between", "behind", "under", "next"], e: "between A and B는 “A와 B 사이에”라는 뜻이에요." },
+      { k: "우리말 뜻을 고르세요.", q: "hospital", o: ["병원", "학교", "은행", "경찰서"], e: "hospital은 병원이에요." },
+      { k: "“학교 맞은편에 있어요.”", q: "Where is the bakery? — It's ___ the school.", o: ["across from", "between", "under", "into"], e: "across from은 “~ 맞은편에”라는 뜻이에요." },
+      { k: "알맞은 대답을 고르세요.", q: "Is there a pet shop near here? — Yes, ___.", o: ["there is", "there are", "it does", "I am"], e: "Is there ~?에는 Yes, there is.로 답해요." },
+      { k: "우리말 뜻을 고르세요.", q: "museum", o: ["박물관", "도서관", "수영장", "서점"], e: "museum은 박물관이에요." },
+      { k: "“카페는 서점 바로 뒤에 있어요.”", q: "The cafe is ___ the bookstore.", o: ["behind", "in front of", "between", "across from"], e: "behind는 “~ 뒤에”, in front of는 “~ 앞에”예요." },
+      { k: "알맞은 대답을 고르세요.", q: "How can I get to the station?", o: ["Go straight and turn left.", "Yes, I can.", "It's five o'clock.", "I'm a student."], e: "길을 묻는 말에는 길 안내로 답해요." }
+    ]
+  },
+  {
+    id: "u6", emoji: "☀️", title: "날씨와 계절", sub: "Weather and Seasons",
+    qs: [
+      { k: "알맞은 대답을 고르세요.", q: "How's the weather today?", o: ["It's sunny.", "It's Monday.", "I'm fine.", "It's seven o'clock."], e: "날씨를 물으면 “It's + 날씨 표현.”으로 답해요." },
+      { k: "우리말 뜻을 고르세요.", q: "rainy", o: ["비 오는", "눈 오는", "바람 부는", "흐린"], e: "rainy는 “비 오는”, snowy는 “눈 오는”, windy는 “바람 부는”, cloudy는 “흐린”이에요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "I need an umbrella. It's ___.", o: ["rainy", "cold", "hot", "warm"], e: "우산이 필요한 날씨는 rainy(비 오는)예요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "It's ___ in winter.", o: ["cold", "hot", "warm", "sunny"], e: "겨울(winter)은 추워요. cold = 추운." },
+      { k: "알맞은 대답을 고르세요.", q: "What's your favorite season?", o: ["I like spring.", "I like rainy.", "It's sunny.", "Yes, I do."], e: "좋아하는 계절을 물었으니 “I like ~.”로 답해요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "It's windy. Let's fly a ___.", o: ["kite", "boat", "ball", "book"], e: "바람이 부는 날에는 연(kite)을 날리기 좋아요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "spring, summer, ___, winter", o: ["fall", "spring", "snow", "season"], e: "봄-여름-가을-겨울 순서라서 fall(가을)이에요." },
+      { k: "알맞은 대답을 고르세요.", q: "Is it cloudy? — No, it ___.", o: ["isn't", "doesn't", "can't", "don't"], e: "Is it ~?에는 No, it isn't.로 답해요." },
+      { k: "빈칸에 알맞은 말을 고르세요.", q: "Summer is ___ and sunny.", o: ["hot", "cold", "snowy", "freezing"], e: "여름(summer)은 덥고 화창해요." },
+      { k: "“오늘 서울은 눈이 와요.”", q: "It's ___ in Seoul today.", o: ["snowy", "sunny", "windy", "cloudy"], e: "눈이 오는 날씨는 snowy예요." }
+    ]
+  }
+];
+</script>
+
+<script>
+const $ = s => document.querySelector(s);
+const W = 800, H = 600;
+const BOUNDS = { x1: 34, x2: 766, y1: 132, y2: 572 };
+const START = { x: 400, y: 545 };
+/* 부딪히는 가구(발 기준 충돌 영역) */
+const OBST = [
+  { x: 350, y: 372, w: 100, h: 48 },   // 트리
+  { x: 30, y: 446, w: 176, h: 84 },    // 소파
+  { x: 636, y: 452, w: 112, h: 84 },   // 안락의자
+  { x: 596, y: 122, w: 150, h: 46 },   // 탁자
+  { x: 26, y: 112, w: 96, h: 40 }      // 책장
+];
+const GIFT_COLORS = [
+  ["#e53935", "#ffd54f"], ["#1e88e5", "#ffffff"], ["#8e24aa", "#ffeb3b"], ["#fb8c00", "#ffffff"], ["#00acc1", "#ffd54f"],
+  ["#ec407a", "#ffffff"], ["#fdd835", "#e53935"], ["#5e35b1", "#ffd54f"], ["#43a047", "#ffffff"], ["#d81b60", "#fff176"]
+];
+const FALLBACK = [[80, 205], [210, 240], [660, 262], [715, 345], [100, 335], [255, 510], [555, 510], [695, 400], [180, 400], [610, 225]];
+
+const state = { name: "", gender: "", unitId: null, qs: [], score: 0, done: 0, scores: {}, cur: -1, answered: false };
+let gifts = [];
+const player = { x: START.x, y: START.y, face: "down" };
+let target = null, moving = false;
+const keys = {};
+let fx = [];
+
+function shuffle(a) {
+  const b = a.slice();
+  for (let i = b.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [b[i], b[j]] = [b[j], b[i]];
+  }
+  return b;
+}
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ===== 소리 ===== */
+let muted = false, ac = null;
+function tone(seq) {
+  if (muted) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    let t = ac.currentTime;
+    seq.forEach(([f, d]) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = "triangle"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.15, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + d);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t); o.stop(t + d);
+      t += d * 0.9;
+    });
+  } catch (e) {}
+}
+$("#mute").addEventListener("click", () => {
+  muted = !muted;
+  $("#mute").textContent = muted ? "🔇" : "🔊";
+});
+
+/* ===== 눈 내리는 배경 ===== */
+(function () {
+  const box = $("#snow");
+  for (let i = 0; i < 36; i++) {
+    const f = document.createElement("span");
+    f.className = "flake";
+    f.textContent = "❄";
+    f.style.left = Math.random() * 100 + "%";
+    f.style.fontSize = (10 + Math.random() * 16) + "px";
+    f.style.animationDuration = (8 + Math.random() * 10) + "s";
+    f.style.animationDelay = (-Math.random() * 15) + "s";
+    f.style.setProperty("--dx", (Math.random() * 80 - 40) + "px");
+    box.appendChild(f);
+  }
+})();
+
+/* ===== 그리기 도우미 ===== */
+function rr(g, x, y, w, h, r) {
+  g.beginPath();
+  g.moveTo(x + r, y);
+  g.arcTo(x + w, y, x + w, y + h, r);
+  g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r);
+  g.arcTo(x, y, x + w, y, r);
+  g.closePath();
+}
+function box(g, x, y, w, h, r, fill) { rr(g, x, y, w, h, r); g.fillStyle = fill; g.fill(); }
+function ell(g, x, y, rx, ry, fill) { g.fillStyle = fill; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); g.fill(); }
+function dot(g, x, y, r, fill) { g.fillStyle = fill; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+
+/* ===== 캐릭터 ===== */
+function drawPlayer(g, x, y, gender, t, isMoving, face) {
+  const sw = isMoving ? Math.sin(t * 14) : 0;
+  const bob = isMoving ? Math.abs(Math.sin(t * 14)) * 2 : 0;
+  const girl = gender === "girl";
+  g.save();
+  g.translate(x, y);
+  ell(g, 0, 0, 17, 6, "rgba(0,0,0,.25)");
+  // 다리 + 신발
+  const l1 = Math.max(0, sw) * 4, l2 = Math.max(0, -sw) * 4;
+  const legColor = girl ? "#ffe0c2" : "#2d3f6e";
+  box(g, -10, -16 - l1, 8, 16, 3, legColor);
+  box(g, 2, -16 - l2, 8, 16, 3, legColor);
+  box(g, -12, -5 - l1, 11, 6, 3, "#3b2a1a");
+  box(g, 1, -5 - l2, 11, 6, 3, "#3b2a1a");
+  g.translate(0, -bob);
+  // 머리카락(뒤)
+  const hair = girl ? "#7a4320" : "#4a2f1a";
+  dot(g, 0, -57, girl ? 17 : 16, hair);
+  if (girl) {
+    dot(g, -21, -50, 7, hair); dot(g, 21, -50, 7, hair);
+    dot(g, -21, -57, 4, "#ff5fa2"); dot(g, 21, -57, 4, "#ff5fa2");
+  }
+  // 몸
+  if (girl) {
+    g.fillStyle = "#d93a56";
+    g.beginPath(); g.moveTo(-12, -44); g.lineTo(12, -44); g.lineTo(19, -12); g.lineTo(-19, -12); g.closePath(); g.fill();
+    g.fillStyle = "#fff"; g.fillRect(-19, -15, 38, 3);
+    box(g, -20, -42 + sw * 3, 8, 15, 4, "#d93a56");
+    box(g, 12, -42 - sw * 3, 8, 15, 4, "#d93a56");
+    dot(g, -16, -25 + sw * 3, 4.5, "#ffd9b8"); dot(g, 16, -25 - sw * 3, 4.5, "#ffd9b8");
+  } else {
+    box(g, -14, -44, 28, 31, 8, "#3b82d6");
+    g.fillStyle = "#fff"; g.fillRect(-14, -16, 28, 3);
+    box(g, -21, -42 + sw * 3, 8, 16, 4, "#3b82d6");
+    box(g, 13, -42 - sw * 3, 8, 16, 4, "#3b82d6");
+    dot(g, -17, -25 + sw * 3, 4.5, "#ffd9b8"); dot(g, 17, -25 - sw * 3, 4.5, "#ffd9b8");
+  }
+  // 얼굴
+  if (face === "up") {
+    dot(g, 0, -56, 14, hair);
+  } else {
+    dot(g, 0, -55, 14, "#ffd9b8");
+    const fx0 = face === "left" ? -3 : face === "right" ? 3 : 0;
+    dot(g, -5 + fx0, -55, 1.9, "#222"); dot(g, 5 + fx0, -55, 1.9, "#222");
+    dot(g, -9 + fx0, -50, 2.6, "rgba(255,120,140,.55)"); dot(g, 9 + fx0, -50, 2.6, "rgba(255,120,140,.55)");
+    g.strokeStyle = "#a0522d"; g.lineWidth = 1.6; g.beginPath(); g.arc(fx0, -50, 3.5, 0.15 * Math.PI, 0.85 * Math.PI); g.stroke();
+    // 앞머리
+    g.fillStyle = hair; g.beginPath(); g.arc(0, -58, 14.5, Math.PI * 1.02, Math.PI * 1.98); g.fill();
+  }
+  // 산타 모자
+  g.fillStyle = "#d62828";
+  g.beginPath(); g.moveTo(-15, -66); g.quadraticCurveTo(-8, -92, 10, -90); g.quadraticCurveTo(8, -76, 15, -66); g.closePath(); g.fill();
+  box(g, -17, -70, 34, 8, 4, "#fff");
+  dot(g, 11, -90, 5, "#fff");
+  g.restore();
+}
+
+/* ===== 배경(한 번만 그림) ===== */
+const dpr = Math.min(window.devicePixelRatio || 1, 2);
+const cv = $("#cv");
+cv.width = W * dpr; cv.height = H * dpr;
+const c = cv.getContext("2d");
+const bg = document.createElement("canvas");
+bg.width = W * dpr; bg.height = H * dpr;
+
+(function buildBG() {
+  const g = bg.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // 바닥
+  for (let y = 100, r = 0; y < H; y += 34, r++) {
+    g.fillStyle = r % 2 ? "#c99a62" : "#c2925a";
+    g.fillRect(0, y, W, 34);
+    g.fillStyle = "rgba(0,0,0,.16)";
+    g.fillRect(0, y, W, 2);
+    for (let x = -((r * 83) % 150); x < W; x += 150) g.fillRect(x, y, 2, 34);
+  }
+  // 벽
+  g.fillStyle = "#2c6e49"; g.fillRect(0, 0, W, 100);
+  g.fillStyle = "rgba(255,255,255,.07)";
+  for (let x = 0; x < W; x += 40) g.fillRect(x, 0, 20, 100);
+  g.fillStyle = "#5a3a1e"; g.fillRect(0, 94, W, 10);
+  g.fillStyle = "rgba(0,0,0,.22)"; g.fillRect(0, 104, W, 8);
+  // 창문
+  function win(x, y, w, h, moon) {
+    g.fillStyle = "#5a3a1e"; g.fillRect(x - 6, y - 6, w + 12, h + 12);
+    const gr = g.createLinearGradient(0, y, 0, y + h);
+    gr.addColorStop(0, "#0b1836"); gr.addColorStop(1, "#25477f");
+    g.fillStyle = gr; g.fillRect(x, y, w, h);
+    if (moon) dot(g, x + w - 24, y + 20, 10, "#fff6c8");
+    g.fillStyle = "rgba(255,255,255,.9)";
+    for (let k = 0; k < 14; k++) { dot(g, x + ((k * 37) % w), y + ((k * 53) % h), 1.6, "rgba(255,255,255,.9)"); }
+    g.fillStyle = "#5a3a1e";
+    g.fillRect(x + w / 2 - 2, y, 4, h); g.fillRect(x, y + h / 2 - 2, w, 4);
+    g.fillStyle = "#e8d6b8"; g.fillRect(x - 10, y + h + 4, w + 20, 6);
+  }
+  win(150, 24, 100, 58, true);
+  win(560, 24, 100, 58, false);
+  // 벽난로
+  g.fillStyle = "#9a4f3c"; g.fillRect(340, 28, 120, 74);
+  g.strokeStyle = "rgba(0,0,0,.22)"; g.lineWidth = 1.5;
+  for (let y = 40; y < 102; y += 12) { g.beginPath(); g.moveTo(340, y); g.lineTo(460, y); g.stroke(); }
+  for (let y = 28, r = 0; y < 102; y += 12, r++) for (let x = 340 + (r % 2) * 15; x < 460; x += 30) { g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 12); g.stroke(); }
+  g.fillStyle = "#1c0d06"; g.fillRect(366, 52, 68, 50);
+  box(g, 326, 18, 148, 14, 3, "#5a3a1e");
+  // 양말
+  [350, 450].forEach((sx, i) => {
+    box(g, sx - 6, 32, 12, 22, 3, i ? "#2e9e57" : "#d62828");
+    ell(g, sx + 1, 56, 8, 5, i ? "#2e9e57" : "#d62828");
+    box(g, sx - 8, 30, 16, 6, 2, "#fff");
+  });
+  // 가랜드
+  g.strokeStyle = "#1b4d2e"; g.lineWidth = 7; g.lineCap = "round";
+  g.beginPath(); g.moveTo(0, 10);
+  for (let x = 0; x < W; x += 100) g.quadraticCurveTo(x + 50, 44, x + 100, 10);
+  g.stroke();
+  const cols = ["#ffd24a", "#ff5a5a", "#5ac8ff", "#ff9ff3", "#9dff7a"];
+  let k = 0;
+  for (let x = 0; x < W; x += 100) {
+    for (let t = 0.15; t < 1; t += 0.2) {
+      const px = x + 100 * t, py = (1 - t) * (1 - t) * 10 + 2 * (1 - t) * t * 44 + t * t * 10;
+      dot(g, px, py + 6, 4, cols[k++ % 5]);
+    }
+  }
+  // 옆/아래 벽
+  g.fillStyle = "#5a3a1e";
+  g.fillRect(0, 100, 16, H); g.fillRect(W - 16, 100, 16, H); g.fillRect(0, H - 12, W, 12);
+  // 러그
+  ell(g, 400, 350, 270, 170, "#9e1f2b");
+  g.strokeStyle = "#f2d9a0"; g.lineWidth = 5; g.beginPath(); g.ellipse(400, 350, 250, 152, 0, 0, Math.PI * 2); g.stroke();
+  g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 2; g.beginPath(); g.ellipse(400, 350, 232, 138, 0, 0, Math.PI * 2); g.stroke();
+})();
+
+/* ===== 가구 ===== */
+function drawShelf() {
+  box(c, 26, 34, 96, 118, 4, "#6b4420");
+  box(c, 32, 40, 84, 106, 2, "#4a2f14");
+  const bc = ["#d62828", "#2e86de", "#f1c40f", "#27ae60", "#8e44ad", "#e67e22"];
+  [44, 82, 120].forEach((sy, r) => {
+    for (let k = 0; k < 7; k++) box(c, 36 + k * 11.5, sy + (k % 3) * 2, 9, 26 - (k % 3) * 2, 1, bc[(k + r * 2) % bc.length]);
+    c.fillStyle = "#6b4420"; c.fillRect(32, sy + 28, 84, 4);
+  });
+}
+function drawTable() {
+  const x = 596, y = 122;
+  ell(c, x + 75, y + 48, 78, 7, "rgba(0,0,0,.2)");
+  box(c, x + 10, y + 26, 8, 20, 2, "#6b4420"); box(c, x + 132, y + 26, 8, 20, 2, "#6b4420");
+  box(c, x + 6, y + 20, 138, 7, 2, "#6b4420");
+  box(c, x, y + 8, 150, 14, 4, "#8a5a2b");
+  // 램프
+  box(c, x + 26, y + 2, 8, 8, 2, "#444");
+  c.fillStyle = "#ffe08a"; c.beginPath(); c.moveTo(x + 18, y - 4); c.lineTo(x + 42, y - 4); c.lineTo(x + 36, y - 24); c.lineTo(x + 24, y - 24); c.closePath(); c.fill();
+  // 쿠키 접시와 우유
+  ell(c, x + 104, y + 10, 18, 5, "#fff");
+  dot(c, x + 98, y + 6, 5, "#b9772e"); dot(c, x + 108, y + 7, 5, "#a56a28"); dot(c, x + 103, y + 3, 4, "#c98a3e");
+  box(c, x + 126, y - 8, 10, 16, 2, "rgba(255,255,255,.9)");
+}
+function drawSofa() {
+  const x = 30, y = 446;
+  ell(c, x + 88, y + 86, 94, 8, "rgba(0,0,0,.2)");
+  box(c, x + 6, y, 164, 50, 12, "#8e2a3a");
+  box(c, x, y + 26, 26, 58, 10, "#7a2230"); box(c, x + 150, y + 26, 26, 58, 10, "#7a2230");
+  box(c, x + 22, y + 44, 132, 36, 8, "#a63347");
+  c.strokeStyle = "rgba(0,0,0,.22)"; c.lineWidth = 2; c.beginPath(); c.moveTo(x + 88, y + 46); c.lineTo(x + 88, y + 78); c.stroke();
+  box(c, x + 34, y + 20, 28, 26, 6, "#f2c14e");
+}
+function drawChair() {
+  const x = 636, y = 452;
+  ell(c, x + 56, y + 86, 60, 8, "rgba(0,0,0,.2)");
+  box(c, x + 8, y, 96, 46, 12, "#2f6f8f");
+  box(c, x, y + 24, 24, 60, 10, "#265a75"); box(c, x + 88, y + 24, 24, 60, 10, "#265a75");
+  box(c, x + 20, y + 42, 72, 38, 8, "#3a86ab");
+}
+
+/* ===== 트리 ===== */
+const TL = [];
+const LAYERS = [{ ay: 250, by: 400, h: 122 }, { ay: 180, by: 318, h: 96 }, { ay: 128, by: 236, h: 68 }];
+LAYERS.forEach(L => { [0.3, 0.6, 0.88].forEach(t => { [-1, 1].forEach(s => { TL.push({ x: 400 + s * L.h * t * 0.85, y: L.ay + (L.by - L.ay) * t - 6 }); }); }); });
+const TCOLS = ["#ffd24a", "#ff5a5a", "#5ac8ff", "#ff9ff3", "#9dff7a"];
+
+function drawTree(t) {
+  const cx = 400, by = 418;
+  ell(c, cx, by + 2, 96, 16, "rgba(0,0,0,.25)");
+  box(c, cx - 16, by - 28, 32, 30, 3, "#7a4a24");
+  LAYERS.forEach(L => {
+    const gr = c.createLinearGradient(0, L.ay, 0, L.by);
+    gr.addColorStop(0, "#3fbf74"); gr.addColorStop(1, "#1a7d43");
+    c.fillStyle = gr;
+    c.beginPath(); c.moveTo(cx, L.ay); c.lineTo(cx - L.h, L.by); c.lineTo(cx + L.h, L.by); c.closePath(); c.fill();
+  });
+  ell(c, cx, by - 6, 66, 11, "#f4f4f4");
+  TL.forEach((p, i) => {
+    if (i % 3 === 0) {
+      dot(c, p.x, p.y, 6, i % 2 ? "#e53935" : "#ffd24a");
+      dot(c, p.x - 2, p.y - 2, 1.8, "rgba(255,255,255,.8)");
+    } else {
+      const a = 0.45 + 0.55 * Math.abs(Math.sin(t * 2.2 + i));
+      c.globalAlpha = a; dot(c, p.x, p.y, 4, TCOLS[i % 5]); c.globalAlpha = 1;
+    }
+  });
+  // 별
+  c.save();
+  c.shadowColor = "#ffd24a"; c.shadowBlur = 14 + 6 * Math.sin(t * 3);
+  c.fillStyle = "#ffd24a"; c.beginPath();
+  for (let k = 0; k < 10; k++) {
+    const ang = (-90 + 36 * k) * Math.PI / 180, rad = k % 2 ? 9 : 20;
+    const px = cx + rad * Math.cos(ang), py = 116 + rad * Math.sin(ang);
+    k ? c.lineTo(px, py) : c.moveTo(px, py);
+  }
+  c.closePath(); c.fill(); c.restore();
+}
+
+function drawFire(t) {
+  const gr = c.createRadialGradient(400, 100, 5, 400, 100, 95);
+  gr.addColorStop(0, "rgba(255,160,40,.38)"); gr.addColorStop(1, "rgba(255,160,40,0)");
+  c.fillStyle = gr; c.fillRect(300, 30, 200, 150);
+  box(c, 372, 96, 56, 8, 3, "#5a3a1e");
+  for (let k = 0; k < 5; k++) {
+    const x = 378 + k * 11, h = 16 + Math.sin(t * 9 + k * 1.7) * 7 + (k === 2 ? 8 : 0);
+    c.fillStyle = "#ff8a1f"; c.beginPath(); c.moveTo(x - 7, 98); c.quadraticCurveTo(x - 6, 98 - h * 0.6, x, 98 - h); c.quadraticCurveTo(x + 6, 98 - h * 0.6, x + 7, 98); c.closePath(); c.fill();
+    c.fillStyle = "#ffe26a"; c.beginPath(); c.moveTo(x - 3, 98); c.quadraticCurveTo(x - 3, 98 - h * 0.4, x, 98 - h * 0.62); c.quadraticCurveTo(x + 3, 98 - h * 0.4, x + 3, 98); c.closePath(); c.fill();
+  }
+}
+
+/* ===== 선물 ===== */
+function drawGift(g, t) {
+  const bob = g.open ? 0 : Math.sin(t * 3 + g.i * 0.8) * 3;
+  const x = g.x, y = g.y + bob;
+  ell(c, g.x, g.y + 2, 21, 6, "rgba(0,0,0,.25)");
+  if (!g.open) {
+    const pr = 0.5 + 0.5 * Math.sin(t * 3 + g.i);
+    const gr = c.createRadialGradient(x, y - 20, 4, x, y - 20, 46);
+    gr.addColorStop(0, "rgba(255,230,120," + (0.35 + 0.2 * pr) + ")"); gr.addColorStop(1, "rgba(255,230,120,0)");
+    c.fillStyle = gr; c.beginPath(); c.arc(x, y - 20, 46, 0, Math.PI * 2); c.fill();
+  }
+  box(c, x - 19, y - 30, 38, 30, 3, g.c);
+  c.fillStyle = g.r; c.fillRect(x - 4, y - 30, 8, 30);
+  if (g.open) { c.fillStyle = "rgba(0,0,0,.35)"; c.fillRect(x - 19, y - 30, 38, 5); }
+  const p = g.open ? Math.min(g.openT / 0.4, 1) : 0;
+  c.save();
+  c.translate(x + p * 8, y - 34 - p * 22);
+  if (p) c.rotate(-0.35 * p);
+  box(c, -23, -8, 46, 14, 3, g.c);
+  box(c, -23, -8, 46, 14, 3, "rgba(255,255,255,.2)");
+  c.fillStyle = g.r; c.fillRect(-4, -8, 8, 14);
+  if (!g.open) {
+    c.strokeStyle = g.r; c.lineWidth = 3;
+    c.beginPath(); c.ellipse(-7, -12, 7, 5, -0.4, 0, Math.PI * 2); c.stroke();
+    c.beginPath(); c.ellipse(7, -12, 7, 5, 0.4, 0, Math.PI * 2); c.stroke();
+  }
+  c.restore();
+  dot(c, x, y - 13, 9, "#fff");
+  c.fillStyle = "#333"; c.font = "13px Jua, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillText(String(g.i + 1), x, y - 12);
+  if (g.open) {
+    dot(c, x + 19, y - 40, 11, g.res ? "#2e9e57" : "#d93a3a");
+    c.strokeStyle = "#fff"; c.lineWidth = 2; c.beginPath(); c.arc(x + 19, y - 40, 11, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = "#fff"; c.font = "15px Jua, sans-serif";
+    c.fillText(g.res ? "✓" : "✗", x + 19, y - 39);
+  }
+}
+
+function genGifts() {
+  const out = [];
+  let minD = 112, tries = 0;
+  while (out.length < 10 && tries < 6000) {
+    tries++;
+    if (tries % 1000 === 0) minD -= 12;
+    const x = 60 + Math.random() * 680, y = 165 + Math.random() * 395;
+    if (x > 255 && x < 545 && y < 450) continue;
+    if (Math.hypot(x - START.x, y - START.y) < 130) continue;
+    if (OBST.some(o => x > o.x - 34 && x < o.x + o.w + 34 && y > o.y - 30 && y < o.y + o.h + 26)) continue;
+    if (out.some(g => Math.hypot(g.x - x, g.y - y) < minD)) continue;
+    out.push({ x, y });
+  }
+  let f = 0;
+  while (out.length < 10) { out.push({ x: FALLBACK[f][0], y: FALLBACK[f][1] }); f++; }
+  return out.map((p, i) => ({ x: p.x, y: p.y, i, c: GIFT_COLORS[i][0], r: GIFT_COLORS[i][1], open: false, res: null, openT: 0, near: false }));
+}
+
+/* ===== 이동 ===== */
+function hits(nx, ny) {
+  const bx = nx - 12, by = ny - 10, bw = 24, bh = 10;
+  return OBST.some(o => bx < o.x + o.w && bx + bw > o.x && by < o.y + o.h && by + bh > o.y);
+}
+function tryMove(mx, my) {
+  const nx = clamp(player.x + mx, BOUNDS.x1, BOUNDS.x2), ny = clamp(player.y + my, BOUNDS.y1, BOUNDS.y2);
+  if (!hits(nx, ny)) { player.x = nx; player.y = ny; }
+}
+function modalOpen() { return !$("#modal").hidden || !$("#result").hidden; }
+
+function update(dt) {
+  gifts.forEach(g => { if (g.open) g.openT += dt; });
+  fx.forEach(p => { p.t += dt; });
+  fx = fx.filter(p => p.t < 1.1);
+  if (modalOpen()) { moving = false; return; }
+  let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+  if (dx || dy) target = null;
+  else if (target) {
+    const vx = target.x - player.x, vy = target.y - player.y, d = Math.hypot(vx, vy);
+    if (d < 5) target = null; else { dx = vx / d; dy = vy / d; }
+  }
+  const len = Math.hypot(dx, dy);
+  moving = len > 0;
+  if (moving) {
+    dx /= len; dy /= len;
+    if (Math.abs(dx) > Math.abs(dy)) player.face = dx < 0 ? "left" : "right";
+    else player.face = dy < 0 ? "up" : "down";
+    const sp = 215 * dt, bx = player.x, by = player.y;
+    tryMove(dx * sp, 0); tryMove(0, dy * sp);
+    if (target && Math.hypot(player.x - bx, player.y - by) < sp * 0.25) { target = null; moving = false; }
+  }
+  gifts.forEach(g => {
+    const near = !g.open && Math.hypot(player.x - g.x, player.y - g.y) < 40;
+    if (near && !g.near && !modalOpen()) openQ(g.i);
+    g.near = near;
+  });
+}
+
+/* ===== 그리기 ===== */
+function draw(t) {
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.clearRect(0, 0, W, H);
+  c.drawImage(bg, 0, 0, W, H);
+  drawFire(t);
+  if (target) {
+    const r = 8 + 3 * Math.sin(t * 8);
+    c.strokeStyle = "rgba(255,255,255,.85)"; c.lineWidth = 2.5;
+    c.beginPath(); c.ellipse(target.x, target.y, r, r * 0.5, 0, 0, Math.PI * 2); c.stroke();
+  }
+  const items = [
+    { y: 152, f: drawShelf }, { y: 168, f: drawTable }, { y: 420, f: () => drawTree(t) },
+    { y: 530, f: drawSofa }, { y: 536, f: drawChair },
+    { y: player.y, f: () => drawPlayer(c, player.x, player.y, state.gender || "boy", t, moving, player.face) }
+  ];
+  gifts.forEach(g => items.push({ y: g.y, f: () => drawGift(g, t) }));
+  items.sort((a, b) => a.y - b.y).forEach(it => it.f());
+  fx.forEach(p => {
+    c.globalAlpha = Math.max(0, 1 - p.t / 1.1);
+    c.font = "34px Jua, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+    c.lineWidth = 5; c.strokeStyle = "rgba(0,0,0,.6)";
+    const yy = p.y - p.t * 55;
+    c.strokeText(p.txt, p.x, yy);
+    c.fillStyle = p.col; c.fillText(p.txt, p.x, yy);
+    c.globalAlpha = 1;
+  });
+}
+
+let last = 0, running = false;
+function loop(ts) {
+  if (!running) return;
+  const dt = Math.min((ts - last) / 1000, 0.05);
+  last = ts;
+  update(dt);
+  draw(ts / 1000);
+  requestAnimationFrame(loop);
+}
+function startLoop() { if (running) return; running = true; last = performance.now(); requestAnimationFrame(loop); }
+function stopLoop() { running = false; }
+
+/* ===== 조작 ===== */
+const KEYMAP = { ArrowLeft: "left", a: "left", A: "left", ArrowRight: "right", d: "right", D: "right", ArrowUp: "up", w: "up", W: "up", ArrowDown: "down", s: "down", S: "down" };
+window.addEventListener("keydown", e => {
+  const k = KEYMAP[e.key];
+  if (!k || !running || modalOpen() || (e.target && e.target.tagName === "INPUT")) return;
+  keys[k] = true;
+  e.preventDefault();
+});
+window.addEventListener("keyup", e => { const k = KEYMAP[e.key]; if (k) keys[k] = false; });
+window.addEventListener("blur", () => { Object.keys(keys).forEach(k => keys[k] = false); });
+
+let pressing = false;
+function setTarget(e) {
+  const r = cv.getBoundingClientRect();
+  target = {
+    x: clamp((e.clientX - r.left) * W / r.width, BOUNDS.x1, BOUNDS.x2),
+    y: clamp((e.clientY - r.top) * H / r.height, BOUNDS.y1, BOUNDS.y2)
+  };
+}
+cv.addEventListener("pointerdown", e => { if (modalOpen()) return; pressing = true; setTarget(e); });
+cv.addEventListener("pointermove", e => { if (pressing && !modalOpen()) setTarget(e); });
+window.addEventListener("pointerup", () => { pressing = false; });
+document.querySelectorAll(".dpad button").forEach(b => {
+  const k = b.dataset.k;
+  b.addEventListener("pointerdown", e => { e.preventDefault(); keys[k] = true; });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, () => { keys[k] = false; }));
+});
+
+/* ===== 화면 전환 / 시작 화면 ===== */
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+  window.scrollTo(0, 0);
+}
+function msg(t) { $("#msg").textContent = t; }
+
+function updateTotal() {
+  const ids = Object.keys(state.scores);
+  const sum = ids.reduce((a, k) => a + state.scores[k], 0);
+  $("#total").textContent = ids.length ? "🏅 누적 점수 " + sum + "점 · 완료한 단원 " + ids.length + "/" + UNITS.length : "";
+}
+
+function renderUnits() {
+  const grid = $("#units");
+  grid.innerHTML = "";
+  UNITS.forEach((u, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "unit" + (state.unitId === u.id ? " sel" : "");
+    const sc = state.scores[u.id];
+    b.innerHTML = '<span class="ue">' + u.emoji + '</span><span class="ut"><b>' + (i + 1) + ". " + u.title + "</b><small>" + u.sub + "</small></span>" + (sc !== undefined ? '<span class="ub">⭐ ' + sc + "/10</span>" : "");
+    b.addEventListener("click", () => { state.unitId = u.id; msg(""); renderUnits(); });
+    grid.appendChild(b);
+  });
+  updateTotal();
+}
+
+function renderChars() {
+  document.querySelectorAll(".char").forEach(b => b.classList.toggle("sel", b.dataset.g === state.gender));
+}
+document.querySelectorAll(".char").forEach(b => {
+  b.addEventListener("click", () => { state.gender = b.dataset.g; msg(""); renderChars(); });
+});
+document.querySelectorAll(".char canvas").forEach(cc => {
+  const g = cc.getContext("2d");
+  drawPlayer(g, cc.width / 2, cc.height - 14, cc.dataset.g, 0, false, "down");
+});
+
+$("#go").addEventListener("click", () => {
+  const n = $("#name").value.trim();
+  if (!n) { msg("이름을 먼저 써 주세요! ✏️"); $("#name").focus(); return; }
+  if (!state.gender) { msg("캐릭터(남자아이/여자아이)를 골라 주세요! 🧑"); return; }
+  if (!state.unitId) { msg("공부할 단원을 골라 주세요! 📚"); return; }
+  state.name = n;
+  startUnit(state.unitId);
+});
+$("#name").addEventListener("keydown", e => { if (e.key === "Enter") $("#go").click(); });
+
+/* ===== 단원 시작 ===== */
+function hud() {
+  $("#pname").textContent = (state.gender === "girl" ? "👧 " : "👦 ") + state.name;
+  $("#pscore").textContent = "⭐ " + state.score + " / 10";
+  $("#pprog").textContent = "🎁 " + state.done + " / 10";
+}
+
+function startUnit(id) {
+  const u = UNITS.find(x => x.id === id);
+  state.unitId = id;
+  state.qs = shuffle(u.qs).map(q => ({
+    k: q.k || "", q: q.q, e: q.e,
+    opts: shuffle(q.o.map((t, i) => ({ t: t, ok: i === 0 }))),
+    res: null
+  }));
+  state.score = 0; state.done = 0; state.cur = -1; state.answered = false;
+  gifts = genGifts();
+  fx = [];
+  player.x = START.x; player.y = START.y; player.face = "up";
+  target = null; moving = false;
+  Object.keys(keys).forEach(k => keys[k] = false);
+  $("#utitle").textContent = u.emoji + " " + u.title;
+  hud();
+  show("screen-game");
+  startLoop();
+}
+
+$("#back").addEventListener("click", () => { stopLoop(); renderUnits(); show("screen-start"); });
+
+/* ===== 문제 창 ===== */
+function renderQ(el, text) {
+  el.textContent = "";
+  const parts = text.split("___");
+  parts.forEach((p, i) => {
+    el.append(p);
+    if (i < parts.length - 1) {
+      const s = document.createElement("span");
+      s.className = "blank";
+      s.textContent = "____";
+      el.append(s);
+    }
+  });
+}
+
+function openQ(i) {
+  const q = state.qs[i];
+  if (!q || q.res !== null) return;
+  Object.keys(keys).forEach(k => keys[k] = false);
+  target = null;
+  state.cur = i;
+  state.answered = false;
+  $("#mhead").textContent = "🎁 " + (i + 1) + "번 선물을 찾았어요! · 문제 " + (state.done + 1) + " / 10";
+  $("#mk").textContent = q.k;
+  $("#mk").hidden = !q.k;
+  renderQ($("#mq"), q.q);
+  const bx = $("#opts");
+  bx.innerHTML = "";
+  q.opts.forEach((o, idx) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "opt";
+    b.textContent = "①②③④"[idx] + "  " + o.t;
+    b.addEventListener("click", () => answer(idx));
+    bx.appendChild(b);
+  });
+  $("#fb").hidden = true;
+  $("#next").hidden = true;
+  $("#modal").hidden = false;
+  tone([[880, 0.1], [1175, 0.15]]);
+}
+
+function answer(idx) {
+  if (state.answered) return;
+  state.answered = true;
+  const q = state.qs[state.cur];
+  const ok = q.opts[idx].ok;
+  q.res = ok;
+  state.done++;
+  if (ok) state.score++;
+  document.querySelectorAll("#opts .opt").forEach((b, i) => {
+    b.disabled = true;
+    if (q.opts[i].ok) b.classList.add("correct");
+    else if (i === idx) b.classList.add("wrong");
+  });
+  const fb = $("#fb");
+  fb.hidden = false;
+  fb.className = "fb " + (ok ? "ok" : "no");
+  $("#fbh").textContent = ok ? "정답이에요! 🎉 +1점" : "아쉬워요! 정답은 “" + q.opts.find(o => o.ok).t + "” 예요.";
+  $("#fbe").textContent = q.e;
+  hud();
+  if (ok) tone([[660, 0.12], [880, 0.2]]); else tone([[260, 0.25]]);
+  $("#next").hidden = false;
+  $("#next").focus();
+}
+
+function closeModal() {
+  if ($("#modal").hidden) return;
+  $("#modal").hidden = true;
+  if (state.answered) {
+    const q = state.qs[state.cur];
+    const g = gifts[state.cur];
+    g.open = true; g.res = q.res; g.openT = 0;
+    fx.push({ x: g.x, y: g.y - 50, t: 0, txt: q.res ? "+1" : "…", col: q.res ? "#ffd24a" : "#cfd8ea" });
+    if (q.res) {
+      const ps = $("#pscore");
+      ps.classList.remove("bump");
+      void ps.offsetWidth;
+      ps.classList.add("bump");
+    }
+    state.answered = false;
+    if (state.done >= 10) setTimeout(showResult, 1200);
+  }
+}
+$("#next").addEventListener("click", closeModal);
+$("#mclose").addEventListener("click", closeModal);
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
+document.addEventListener("keydown", e => {
+  if ($("#modal").hidden) return;
+  if (e.key === "Escape") closeModal();
+  if (!state.answered && "1234".includes(e.key) && e.key.length === 1) {
+    const b = document.querySelectorAll("#opts .opt")[Number(e.key) - 1];
+    if (b) b.click();
+  }
+});
+
+/* ===== 결과 ===== */
+function confetti() {
+  const em = ["🎉", "⭐", "✨", "🎁", "❄️", "🎄"];
+  for (let i = 0; i < 50; i++) {
+    const s = document.createElement("span");
+    s.className = "conf";
+    s.textContent = em[Math.floor(Math.random() * em.length)];
+    s.style.left = Math.random() * 100 + "%";
+    s.style.fontSize = (16 + Math.random() * 18) + "px";
+    s.style.animationDuration = (2.5 + Math.random() * 2.5) + "s";
+    s.style.animationDelay = (Math.random() * 0.8) + "s";
+    s.style.setProperty("--dx", (Math.random() * 120 - 60) + "px");
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 6500);
+  }
+}
+
+function nextUnitId() {
+  const idx = UNITS.findIndex(u => u.id === state.unitId);
+  for (let k = 1; k <= UNITS.length; k++) {
+    const u = UNITS[(idx + k) % UNITS.length];
+    if (state.scores[u.id] === undefined) return u.id;
+  }
+  return null;
+}
+
+function showResult() {
+  const sc = state.score;
+  state.scores[state.unitId] = sc;
+  let emo, title, text;
+  if (sc === 10) { emo = "🏆"; title = "완벽해요!"; text = "영어 박사님이에요! 모든 문제를 맞혔어요."; }
+  else if (sc >= 8) { emo = "🎉"; title = "정말 잘했어요!"; text = "조금만 더 하면 만점이에요."; }
+  else if (sc >= 6) { emo = "😊"; title = "잘했어요!"; text = "틀린 문제를 다시 풀어 보면 더 좋아져요."; }
+  else { emo = "💪"; title = "괜찮아요!"; text = "다시 도전하면 분명 더 잘할 수 있어요."; }
+  $("#rEmoji").textContent = emo;
+  $("#rTitle").textContent = state.name + ", " + title;
+  $("#rScore").textContent = sc;
+  $("#rMsg").textContent = text;
+  const ids = Object.keys(state.scores);
+  const sum = ids.reduce((a, k) => a + state.scores[k], 0);
+  const nid = nextUnitId();
+  $("#rTot").textContent = "누적 점수 " + sum + "점 · 완료한 단원 " + ids.length + "/" + UNITS.length + (nid ? "" : " 🎄 모든 단원을 끝냈어요!");
+  const nb = $("#rNext");
+  if (nid) {
+    const nu = UNITS.find(u => u.id === nid);
+    nb.hidden = false;
+    nb.textContent = "다음 단원으로 ▶ " + nu.emoji + " " + nu.title;
+  } else {
+    nb.hidden = true;
+  }
+  $("#result").hidden = false;
+  if (sc >= 7) { confetti(); tone([[523, 0.15], [659, 0.15], [784, 0.15], [1047, 0.3]]); }
+  else tone([[440, 0.2], [523, 0.3]]);
+}
+
+$("#rNext").addEventListener("click", () => {
+  const nid = nextUnitId();
+  $("#result").hidden = true;
+  if (nid) startUnit(nid);
+});
+$("#rPick").addEventListener("click", () => {
+  $("#result").hidden = true;
+  stopLoop();
+  state.unitId = nextUnitId() || state.unitId;
+  renderUnits();
+  show("screen-start");
+});
+$("#rRetry").addEventListener("click", () => {
+  $("#result").hidden = true;
+  startUnit(state.unitId);
+});
+
+renderUnits();
+renderChars();
+</script>
+</body>
+</html>
