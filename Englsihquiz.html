@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>초등 5학년 영어 탐험 퀴즈</title>
+<style>
+  body {
+    font-family: 'Malgun Gothic', sans-serif;
+    background-color: #2c3e50;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  #start-screen, #game-screen, #result-screen {
+    background: #34495e;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    text-align: center;
+    width: 800px;
+  }
+  .hidden { display: none !important; }
+  input, select, button {
+    font-size: 18px;
+    padding: 10px 15px;
+    margin: 10px;
+    border-radius: 8px;
+    border: none;
+  }
+  button {
+    background-color: #27ae60;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  button:hover { background-color: #2ecc71; }
+  #hud {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    background: #1a252f;
+    padding: 10px 20px;
+    border-radius: 8px;
+  }
+  canvas {
+    border: 4px solid #ecf0f1;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
+  }
+  /* 퀴즈 모달창 */
+  #quiz-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    color: #2c3e50;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    width: 450px;
+    z-index: 100;
+    text-align: center;
+  }
+  .option-btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    background: #3498db;
+    color: white;
+    text-align: left;
+  }
+  .option-btn:hover { background: #2980b9; }
+  #feedback {
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- 1. 초기 화면 -->
+  <div id="start-screen">
+    <h1>🏫 초등 5학년 영어 탐험 퀴즈</h1>
+    <p>이름과 도전할 단원을 선택하고 시작하세요!</p>
+    <div>
+      <input type="text" id="player-name" placeholder="이름을 입력하세요" />
+      <select id="unit-select">
+        <option value="1">1단원: 출신 국가 묻고 답하기 (Where are you from?)</option>
+        <option value="2">2단원: 요일과 과목 말하기 (What day is it today?)</option>
+        <option value="3">3단원: 허락 요청하기 (May I sit here?)</option>
+      </select>
+    </div>
+    <button onclick="startGame()">모험 시작하기</button>
+  </div>
+
+  <!-- 2. 게임 화면 -->
+  <div id="game-screen" class="hidden">
+    <div id="hud">
+      <span id="hud-player">이름: -</span>
+      <span id="hud-unit">단원: -</span>
+      <span id="hud-progress">진행: 0 / 10</span>
+      <span id="hud-score">점수: 0점</span>
+    </div>
+    <canvas id="gameCanvas" width="760" height="450"></canvas>
+    <p>💡 <b>방향키(↑, ↓, ←, →)</b>를 움직여 황금 상자(🎁)를 열어 10문제를 풀어보세요!</p>
+  </div>
+
+  <!-- 퀴즈 팝업 -->
+  <div id="quiz-modal" class="hidden">
+    <h3 id="quiz-question">문제 내용</h3>
+    <div id="quiz-options"></div>
+    <div id="feedback"></div>
+    <button id="next-btn" class="hidden" onclick="closeQuiz()">계속 이동하기</button>
+  </div>
+
+  <!-- 3. 결과 화면 -->
+  <div id="result-screen" class="hidden">
+    <h2 id="result-title">단원 결과</h2>
+    <p id="result-desc" style="font-size: 20px;"></p>
+    <button id="result-action-btn"></button>
+  </div>
+
+<script>
+// 초등 5학년 영어 단원별 10문제 데이터 (재도전 시 문제와 보기가 섞여서 출제됨)
+const quizData = {
+  1: {
+    title: "1단원: Where are you from?",
+    bgColor: "#87CEEB", // 하늘 배경
+    decoColor: "#ffffff", // 구름
+    questions: [
+      { q: "'어느 나라에서 왔니?'를 영어로 바르게 말한 것은?", options: ["Where are you from?", "How are you?", "What is your name?", "Where do you live?"], a: 0 },
+      { q: "'나는 한국에서 왔어.'의 빈칸에 알맞은 말은? I'm _____ Korea.", options: ["from", "in", "at", "to"], a: 0 },
+      { q: "다음 중 나라 이름과 뜻이 바르게 연결된 것은?", options: ["Canada - 캐나다", "China - 일본", "France - 미국", "Australia - 영국"], a: 0 },
+      { q: "'Nice to meet you.'에 대한 알맞은 대답은?", options: ["Nice to meet you, too.", "I'm fine, thank you.", "I'm from the U.S.", "See you later."], a: 0 },
+      { q: "'그는 베트남에서 왔어.'를 영어로 바르게 옮긴 것은?", options: ["He is from Vietnam.", "She is from Vietnam.", "I am from Vietnam.", "You are from Vietnam."], a: 0 },
+      { q: "다음 중 '호주'를 뜻하는 영어 단어는?", options: ["Australia", "America", "Austria", "Africa"], a: 0 },
+      { q: "'Where is she from?'에 대한 알맞은 대답은?", options: ["She's from France.", "He's from France.", "I'm from France.", "They're from France."], a: 0 },
+      { q: "철자가 올바르게 쓰인 나라 이름은?", options: ["Korea", "Koria", "Corea", "Korear"], a: 0 },
+      { q: "'만나서 반가워.'를 영어로 표현할 때 빈칸에 알맞은 말은? _____ to meet you.", options: ["Nice", "Good", "Fine", "Sad"], a: 0 },
+      { q: "다음 중 성격이 다른 단어 하나는?", options: ["Hello", "Korea", "China", "Canada"], a: 0 }
+    ]
+  },
+  2: {
+    title: "2단원: What day is it today?",
+    bgColor: "#A8E6CF", // 공원/학교 잔디 배경
+    decoColor: "#56ab2f",
+    questions: [
+      { q: "'오늘 무슨 요일이니?'를 영어로 바르게 말한 것은?", options: ["What day is it today?", "What time is it?", "How is the weather?", "What's this?"], a: 0 },
+      { q: "'오늘은 수요일이야.'를 영어로 바르게 옮긴 것은?", options: ["It's Wednesday.", "It's Monday.", "It's Friday.", "It's Sunday."], a: 0 },
+      { q: "다음 중 '금요일'을 뜻하는 영어 단어는?", options: ["Friday", "Thursday", "Tuesday", "Saturday"], a: 0 },
+      { q: "'나는 월요일에 과학 수업이 있어.'의 빈칸은? I have _____ class on Monday.", options: ["science", "music", "art", "math"], a: 0 },
+      { q: "다음 요일의 순서가 바르게 나열된 것은?", options: ["Monday - Tuesday - Wednesday", "Monday - Wednesday - Tuesday", "Friday - Thursday - Saturday", "Sunday - Saturday - Monday"], a: 0 },
+      { q: "'미술' 과목을 영어로 바르게 쓴 것은?", options: ["art", "math", "music", "Korean"], a: 0 },
+      { q: "요일 앞에 주로 쓰는 전치사는 무엇인가요? (예: ___ Sunday)", options: ["on", "in", "at", "from"], a: 0 },
+      { q: "'수학'을 뜻하는 영어 단어는?", options: ["math", "English", "P.E.", "music"], a: 0 },
+      { q: "'It's Thursday.'는 무슨 요일인가요?", options: ["목요일", "화요일", "토요일", "일요일"], a: 0 },
+      { q: "다음 중 과목 이름이 아닌 것은?", options: ["Tuesday", "Science", "Music", "English"], a: 0 }
+    ]
+  },
+  3: {
+    title: "3단원: May I sit here?",
+    bgColor: "#FFD3B6", // 따뜻한 실내/도서관 배경
+    decoColor: "#FFAAA5",
+    questions: [
+      { q: "'여기 앉아도 될까요?'를 영어로 바르게 말한 것은?", options: ["May I sit here?", "Can you sit here?", "Sit down, please.", "Where is my seat?"], a: 0 },
+      { q: "'May I borrow your pencil?'의 뜻으로 알맞은 것은?", options: ["네 연필 좀 빌려도 될까?", "내 연필 어디 있니?", "이것은 네 연필이니?", "연필 좀 주겠니?"], a: 0 },
+      { q: "상대방의 허락 요청에 흔쾌히 승낙할 때 하는 말은?", options: ["Sure, go ahead.", "Sorry, you can't.", "No, thank you.", "You're welcome."], a: 0 },
+      { q: "허락을 거절할 때 정중하게 하는 표현은?", options: ["Sorry, you can't.", "Yes, you may.", "Sure.", "Of course."], a: 0 },
+      { q: "'사진을 찍다'를 영어로 바르게 표현한 것은?", options: ["take a picture", "sit here", "come in", "use the phone"], a: 0 },
+      { q: "'들어가도 될까요?'의 빈칸에 알맞은 말은? May I _____ in?", options: ["come", "go", "sit", "run"], a: 0 },
+      { q: "'화장실에 가도 될까요?'를 영어로 바르게 옮긴 것은?", options: ["May I go to the restroom?", "May I sit here?", "May I drink water?", "May I open the door?"], a: 0 },
+      { q: "'물 좀 마셔도 될까요?'의 빈칸은? May I _____ some water?", options: ["drink", "eat", "take", "borrow"], a: 0 },
+      { q: "다음 중 허락을 구할 때 문장 맨 앞에 쓰는 말은?", options: ["May I", "Do you", "Are you", "What is"], a: 0 },
+      { q: "'Sure, go ahead.'의 뜻은 무엇인가요?", options: ["물론이지, 그렇게 해.", "미안하지만 안 돼.", "천만에요.", "조심하세요."], a: 0 }
+    ]
+  }
+};
+
+let playerName = "";
+let currentUnit = 1;
+let currentQuestions = [];
+let solvedCount = 0;
+let correctCount = 0;
+let isQuizOpen = false;
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let player = { x: 360, y: 200, size: 30, speed: 5 };
+let boxes = [];
+let keys = {};
+
+// 배열 섞기 함수 (재도전 시 문제와 보기를 섞어 새로운 느낌 제공)
+function shuffle(array) {
+  let copy = JSON.parse(JSON.stringify(array));
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function startGame() {
+  const nameInput = document.getElementById("player-name").value.trim();
+  if (!nameInput) {
+    alert("이름을 입력해 주세요!");
+    return;
+  }
+  playerName = nameInput;
+  currentUnit = parseInt(document.getElementById("unit-select").value);
+  
+  document.getElementById("start-screen").classList.add("hidden");
+  initUnit(currentUnit);
+}
+
+function initUnit(unitNum) {
+  currentUnit = unitNum;
+  solvedCount = 0;
+  correctCount = 0;
+  isQuizOpen = false;
+  
+  // 문제 섞기 및 보기 섞기
+  let rawQuestions = shuffle(quizData[currentUnit].questions);
+  currentQuestions = rawQuestions.map(item => {
+    let correctText = item.options[item.a];
+    let mixedOptions = shuffle(item.options);
+    return {
+      q: item.q,
+      options: mixedOptions,
+      a: mixedOptions.indexOf(correctText)
+    };
+  });
+
+  // 플레이어 위치 초기화 및 10개의 보물상자 배치
+  player.x = 365;
+  player.y = 210;
+  boxes = [];
+  const positions = [
+    {x: 80, y: 60}, {x: 260, y: 60}, {x: 460, y: 60}, {x: 640, y: 60},
+    {x: 80, y: 210}, {x: 640, y: 210},
+    {x: 80, y: 360}, {x: 260, y: 360}, {x: 460, y: 360}, {x: 640, y: 360}
+  ];
+
+  for (let i = 0; i < 10; i++) {
+    boxes.push({
+      x: positions[i].x,
+      y: positions[i].y,
+      size: 35,
+      opened: false,
+      qIndex: i
+    });
+  }
+
+  updateHUD();
+  document.getElementById("result-screen").classList.add("hidden");
+  document.getElementById("game-screen").classList.remove("hidden");
+  requestAnimationFrame(gameLoop);
+}
+
+function updateHUD() {
+  document.getElementById("hud-player").innerText = `학생: ${playerName}`;
+  document.getElementById("hud-unit").innerText = quizData[currentUnit].title;
+  document.getElementById("hud-progress").innerText = `진행: ${solvedCount} / 10`;
+  document.getElementById("hud-score").innerText = `정답 수: ${correctCount}개`;
+}
+
+// 방향키 입력 감지
+window.addEventListener("keydown", e => {
+  if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+    e.preventDefault();
+    keys[e.key] = true;
+  }
+});
+window.addEventListener("keyup", e => { keys[e.key] = false; });
+
